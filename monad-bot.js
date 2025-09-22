@@ -103,12 +103,17 @@ client.once('ready', async () => {
                 .setDescription('Reset your verification status (for testing)')
         ];
 
+        // Wait a moment for guild cache to populate
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
         const guild = client.guilds.cache.get(process.env.GUILD_ID);
         if (guild) {
             await guild.commands.set(commands);
             console.log('✅ Slash commands registered successfully');
         } else {
             console.warn('⚠️ Guild not found. Make sure GUILD_ID is set correctly in .env');
+            console.warn(`   📋 Guild ID: ${process.env.GUILD_ID}`);
+            console.warn(`   🔍 Available guilds: ${client.guilds.cache.map(g => `${g.name} (${g.id})`).join(', ')}`);
         }
     } catch (error) {
         console.error('❌ Error registering commands:', error);
@@ -777,8 +782,7 @@ async function handleModalSubmit(interaction) {
             .setDescription('To verify wallet ownership, send a small transaction with the exact amount below:')
             .addFields(
                 { name: '💸 Amount to Send:', value: `\`${formatAmountForDisplay(verificationAmount)} MON\``, inline: false },
-                { name: '📍 Send exact amount to:', value: `\`${config.botWallet}\``, inline: false },
-                { name: '📱 From your Wallet:', value: `**${walletAddress}**`, inline: false },
+                { name: '📍 Send exact amount from your Wallet to:', value: `\`${config.botWallet}\``, inline: false },
                 { name: '⚠️ Important:', value: '• Use the **EXACT** amount shown above\n• Send from the wallet address specified above\n• Transaction must be on Monad Testnet\n• Only send MON (not tokens)' },
                 { name: '⏰ Time Limit:', value: 'Transaction must be sent within 3 minutes (we check last 1000 blocks)' }
             )
